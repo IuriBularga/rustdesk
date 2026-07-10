@@ -4,6 +4,9 @@
 .idea
 .DS_Store
 .env
+# TradingMD: local build secrets (relay server + public key). Never commit.
+tradingmd.env
+*.tradingmd.env
 libsciter-gtk.so
 src/ui/inline.rs
 extractor

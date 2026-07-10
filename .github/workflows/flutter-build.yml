@@ -52,6 +52,10 @@ env:
   # so MACOS_P12_BASE64 / MACOS_NOTARIZE_JSON / MACOS_CODESIGN_IDENTITY are unused.
   UPLOAD_ARTIFACT: "${{ inputs.upload-artifact }}"
   SIGN_BASE_URL: "${{ secrets.SIGN_BASE_URL }}-2"
+  # TradingMD: bake the relay server + public key into every build from repo
+  # secrets. Not set -> config.rs falls back to the public RustDesk defaults.
+  RENDEZVOUS_SERVER: "${{ secrets.RENDEZVOUS_SERVER }}"
+  RS_PUB_KEY: "${{ secrets.RS_PUB_KEY }}"
 
 jobs:
   generate-bridge:
@@ -783,12 +787,7 @@ jobs:
           rustc -V
 
       - name: Build TradingMD Remote
-        env:
-          # TradingMD: bake the rendezvous/relay server and its public key into
-          # the binary. Falls back to the values compiled into config.rs when the
-          # secrets are not configured.
-          RENDEZVOUS_SERVER: ${{ secrets.RENDEZVOUS_SERVER }}
-          RS_PUB_KEY: ${{ secrets.RS_PUB_KEY }}
+        # RENDEZVOUS_SERVER / RS_PUB_KEY are provided at the workflow level.
         run: |
           if [ "${{ matrix.job.target }}" = "aarch64-apple-darwin" ]; then
             MIN_MACOS_VERSION="12.3"

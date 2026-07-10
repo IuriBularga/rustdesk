@@ -1,34 +1,46 @@
 # Сборка TradingMD Remote
 
 Форк RustDesk для Trading.md: клиент работает **только как хост** (принимает
-входящие подключения) и жёстко привязан к серверу `<RENDEZVOUS_SERVER>`.
+входящие подключения) и жёстко привязан к серверу, заданному **при сборке**.
 
 ## Сервер и ключ
 
 Адрес rendezvous/relay-сервера и его публичный ключ зашиваются в бинарник **на
-этапе сборки** через переменные окружения (`option_env!` в
+этапе сборки** из переменных окружения (`option_env!` в
 `libs/hbb_common/src/config.rs`):
 
-| Переменная          | Значение по умолчанию (прошито)                |
-|---------------------|------------------------------------------------|
-| `RENDEZVOUS_SERVER` | `<RENDEZVOUS_SERVER>`                            |
-| `RS_PUB_KEY`        | `<RS_PUB_KEY>` |
+| Переменная          | Назначение                          |
+|---------------------|-------------------------------------|
+| `RENDEZVOUS_SERVER` | хост rendezvous/relay-сервера       |
+| `RS_PUB_KEY`        | публичный ключ клиента этого сервера |
 
-Если переменные не заданы, используются значения Trading.md из таблицы, так
-что обычная сборка уже привязана к нашему серверу. Задавать их нужно только
-для сборки под другой сервер (например, тестовый):
+**Значения НЕ хранятся в репозитории.** Их нужно передать через окружение:
 
-```bash
-# bash
-export RENDEZVOUS_SERVER=test.trading.md
-export RS_PUB_KEY=<публичный ключ тестового сервера>
-```
+- **Локально** — файл `tradingmd.env` в корне репозитория (он в `.gitignore`,
+  в гит не попадает). Пример уже лежит рядом; впишите туда реальные значения и
+  подгрузите перед сборкой:
 
-```powershell
-# PowerShell
-$env:RENDEZVOUS_SERVER = "test.trading.md"
-$env:RS_PUB_KEY = "<ключ>"
-```
+  ```bash
+  # bash
+  set -a; source ./tradingmd.env; set +a
+  ```
+  ```powershell
+  # PowerShell
+  Get-Content ./tradingmd.env | ForEach-Object {
+    if ($_ -match '^\s*([^#=]+)=(.*)$') {
+      [Environment]::SetEnvironmentVariable($matches[1].Trim(), $matches[2].Trim())
+    }
+  }
+  ```
+
+- **В CI** — репозиторные секреты GitHub Actions `RENDEZVOUS_SERVER` и
+  `RS_PUB_KEY` (Settings → Secrets and variables → Actions). Workflow
+  `flutter-build.yml` прокидывает их во все сборочные джобы.
+
+Если переменные не заданы, `config.rs` использует **публичные значения
+upstream RustDesk** (`rs-ny.rustdesk.com`), чтобы сборка всё равно
+компилировалась. Для рабочих сборок значения задавать **обязательно**, иначе
+клиент подключится к публичному серверу RustDesk, а не к нашему.
 
 `libs/hbb_common/build.rs` объявляет `rerun-if-env-changed`, поэтому смена
 переменных автоматически вызывает пересборку.
@@ -40,18 +52,26 @@ $env:RS_PUB_KEY = "<ключ>"
 проигнорировано, а UI «ID/Relay Server» скрыт (`hide-server-settings=Y` в
 `BUILTIN_SETTINGS`).
 
-## ВАЖНО: сабмодуль hbb_common
+## Сабмодуль hbb_common
 
 `libs/hbb_common` — git-сабмодуль. Наши изменения (имя приложения, привязка к
-серверу) лежат в нём на локальной ветке `tradingmd`. Перед пушем основного
-репозитория нужно:
+серверу, incoming-only) лежат в нём на ветке `tradingmd` форка
+**https://github.com/IuriBularga/hbb_common** — `.gitmodules` уже указывает на
+этот форк. Клонировать с сабмодулями:
 
-1. Сделать форк https://github.com/rustdesk/hbb_common (например,
-   `IuriBularga/hbb_common`).
-2. Запушить ветку: `cd libs/hbb_common && git push <fork-url> tradingmd`.
-3. Обновить URL в `.gitmodules` на форк и закоммитить.
+```bash
+git clone --recurse-submodules <this-repo-url>
+# либо в уже склонированном:
+git submodule update --init --recursive
+```
 
-Без этого CI и другие машины не смогут получить закоммиченный SHA сабмодуля.
+Если правите `libs/hbb_common`, коммитьте на ветку `tradingmd`, пушьте в форк
+и обновляйте закоммиченный SHA сабмодуля в основном репозитории:
+
+```bash
+cd libs/hbb_common && git push fork tradingmd && cd ../..
+git add libs/hbb_common && git commit
+```
 
 ## Windows (desktop, Flutter UI)
 
@@ -104,11 +124,10 @@ msbuild msi.sln -p:Configuration=Release -p:Platform=x64 /p:TargetVersion=Window
 Требования: Xcode + command line tools, Rust **1.81** (`MAC_RUST_VERSION`),
 Flutter 3.24.5, `brew install llvm create-dmg pkg-config`, NASM 2.16.x, vcpkg.
 
-Переменные окружения — те же, что и везде:
+Переменные окружения — те же, что и везде (см. раздел «Сервер и ключ»):
 
 ```bash
-export RENDEZVOUS_SERVER=<RENDEZVOUS_SERVER>      # опционально, уже прошито
-export RS_PUB_KEY='<RS_PUB_KEY>'
+set -a; source ./tradingmd.env; set +a
 ./build.py --flutter --hwcodec --unix-file-copy-paste   # + --screencapturekit на Apple Silicon
 ```
 
@@ -130,8 +149,8 @@ Apple Developer аккаунта нет, поэтому:
 
 - артефакты: `tradingmd-remote-<версия>-aarch64.dmg` (Apple Silicon) и
   `tradingmd-remote-<версия>-x86_64.dmg` (Intel);
-- переменные `RENDEZVOUS_SERVER` / `RS_PUB_KEY` в macOS-джобе берутся из
-  `secrets` (если секреты не заданы, используются значения из `config.rs`).
+- переменные `RENDEZVOUS_SERVER` / `RS_PUB_KEY` берутся из `secrets` (если
+  секреты не заданы, используется публичный fallback из `config.rs`).
 
 Следствие: приложение **не нотаризовано**, при первом запуске macOS покажет
 предупреждение Gatekeeper. Инструкция для клиентов — `INSTALL_MACOS_RU.md`.
@@ -168,7 +187,8 @@ cd flutter && flutter analyze
 ## CI (GitHub Actions)
 
 `.github/workflows/flutter-build.yml` собирает Windows/macOS/Linux/Android.
-Значения сервера/ключа прошиты в исходниках; при необходимости их можно
-переопределить, экспортировав `RENDEZVOUS_SERVER`/`RS_PUB_KEY` в env
-соответствующей джобы (для macOS уже сделано через `secrets`, см. раздел
-macOS ниже).
+Значения сервера/ключа прокидываются во все джобы из секретов
+`RENDEZVOUS_SERVER` / `RS_PUB_KEY` (объявлены в верхнем блоке `env:` workflow).
+Их нужно один раз добавить в Settings → Secrets and variables → Actions.
+Без секретов сборка не падает, но клиент будет собран с публичным сервером
+RustDesk.
