@@ -8,6 +8,7 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:zxing2/qrcode.dart';
 
 import '../../common.dart';
+import '../../consts.dart';
 import '../../models/platform_model.dart';
 import '../widgets/dialog.dart';
 
@@ -149,6 +150,12 @@ class _ScanPageState extends State<ScanPage> {
   void showServerSettingFromQr(String data) async {
     closeConnection();
     await controller?.pauseCamera();
+    // TradingMD: the server is hard-pinned at build time, importing a server
+    // config is not allowed.
+    if (bind.mainGetBuildinOption(key: kOptionHideServerSetting) == 'Y') {
+      showToast('Invalid QR code');
+      return;
+    }
     if (!data.startsWith('config=')) {
       showToast('Invalid QR code');
       return;
