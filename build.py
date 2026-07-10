@@ -175,7 +175,7 @@ def generate_build_script_for_docker():
             pushd /tmp && git clone https://github.com/SoLongAndThanksForAllThePizza/flutter_rust_bridge --depth=1 && popd
             pushd /tmp/flutter_rust_bridge/frb_codegen && cargo install --path . --locked && popd
             pushd flutter && flutter pub get && popd
-            ~/.cargo/bin/flutter_rust_bridge_codegen --rust-input ./src/flutter_ffi.rs --dart-output ./flutter/lib/generated_bridge.dart
+            ~/.cargo/bin/flutter_rust_bridge_codegen --rust-input ./src/flutter_ffi.rs --dart-output ./flutter/lib/generated_bridge.dart --class-name Rustdesk
             # install vcpkg
             pushd /opt
             export VCPKG_ROOT=`pwd`/vcpkg
