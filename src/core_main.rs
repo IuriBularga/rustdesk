@@ -805,6 +805,14 @@ fn import_config(path: &str) {
 /// If it returns [`Some`], then the process will continue, and flutter gui will be started.
 #[cfg(feature = "flutter")]
 fn core_main_invoke_new_connection(mut args: std::env::Args) -> Option<Vec<String>> {
+    // TradingMD: incoming-only build; reject --connect/--play/--file-transfer/
+    // --view-camera/--port-forward/--terminal/--rdp CLI requests.
+    if config::is_incoming_only() {
+        log::error!(
+            "Outgoing connections are disabled in this incoming-only build, rejecting the CLI connect request."
+        );
+        return None;
+    }
     let mut authority = None;
     let mut id = None;
     let mut param_array = vec![];

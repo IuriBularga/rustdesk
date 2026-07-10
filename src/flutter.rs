@@ -1306,6 +1306,12 @@ pub fn session_add(
     is_shared_password: bool,
     conn_token: Option<String>,
 ) -> ResultType<FlutterSession> {
+    // TradingMD: incoming-only build, never create an outgoing session
+    // (remote control, file transfer, view camera, port forward, terminal).
+    if hbb_common::config::is_incoming_only() {
+        log::error!("Rejecting outgoing session to \"{id}\": this build is incoming-only.");
+        bail!("Outgoing connections are disabled in this build");
+    }
     let conn_type = if is_file_transfer {
         ConnType::FILE_TRANSFER
     } else if is_view_camera {

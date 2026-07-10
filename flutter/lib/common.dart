@@ -2587,6 +2587,12 @@ connect(BuildContext context, String id,
     String? password,
     String? connToken,
     bool? isSharedPassword}) async {
+  // TradingMD: incoming-only build, outgoing connections are disabled.
+  if (bind.isIncomingOnly()) {
+    debugPrint(
+        'Rejecting outgoing connection to "$id": this build is incoming-only.');
+    return;
+  }
   if (id == '') return;
   if (!isDesktop || desktopType == DesktopType.main) {
     try {

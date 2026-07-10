@@ -1207,6 +1207,13 @@ pub fn recent_sessions_updated() -> bool {
 
 #[cfg(not(any(target_os = "android", target_os = "ios", feature = "flutter")))]
 pub fn new_remote(id: String, remote_type: String, force_relay: bool) {
+    // TradingMD: incoming-only build, outgoing connections are disabled.
+    if hbb_common::config::is_incoming_only() {
+        log::error!(
+            "Rejecting outgoing \"{remote_type}\" connection to \"{id}\": this build is incoming-only."
+        );
+        return;
+    }
     let mut lock = CHILDREN.lock().unwrap();
     let mut args = vec![format!("--{}", remote_type), id.clone()];
     if force_relay {
