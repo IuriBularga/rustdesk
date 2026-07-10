@@ -99,6 +99,59 @@ nuget restore msi.sln
 msbuild msi.sln -p:Configuration=Release -p:Platform=x64 /p:TargetVersion=Windows10
 ```
 
+## macOS (без Apple Developer аккаунта)
+
+Требования: Xcode + command line tools, Rust **1.81** (`MAC_RUST_VERSION`),
+Flutter 3.24.5, `brew install llvm create-dmg pkg-config`, NASM 2.16.x, vcpkg.
+
+Переменные окружения — те же, что и везде:
+
+```bash
+export RENDEZVOUS_SERVER=<RENDEZVOUS_SERVER>      # опционально, уже прошито
+export RS_PUB_KEY='<RS_PUB_KEY>'
+./build.py --flutter --hwcodec --unix-file-copy-paste   # + --screencapturekit на Apple Silicon
+```
+
+Сборка даёт `flutter/build/macos/Build/Products/Release/TradingMD Remote.app`
+(bundle id `md.trading.remote`).
+
+### Подпись: только ad-hoc
+
+Apple Developer аккаунта нет, поэтому:
+
+- в `.github/workflows/flutter-build.yml` **удалены** шаги
+  `import-codesign-certs`, импорт notarize-ключа, установка `rcodesign`,
+  Developer-ID `codesign` и `notary-submit --staple`;
+- вместо них применяется **ad-hoc подпись**:
+
+  ```bash
+  codesign --force --deep --sign - "TradingMD Remote.app"
+  ```
+
+- артефакты: `tradingmd-remote-<версия>-aarch64.dmg` (Apple Silicon) и
+  `tradingmd-remote-<версия>-x86_64.dmg` (Intel);
+- переменные `RENDEZVOUS_SERVER` / `RS_PUB_KEY` в macOS-джобе берутся из
+  `secrets` (если секреты не заданы, используются значения из `config.rs`).
+
+Следствие: приложение **не нотаризовано**, при первом запуске macOS покажет
+предупреждение Gatekeeper. Инструкция для клиентов — `INSTALL_MACOS_RU.md`.
+
+### Когда появится Apple Developer аккаунт
+
+Нужно вернуть в macOS-джобу `.github/workflows/flutter-build.yml`
+(см. историю git до коммита «macos: ...»):
+
+1. Шаг `apple-actions/import-codesign-certs` с секретами `MACOS_P12_BASE64`,
+   `MACOS_P12_PASSWORD` и глобальную env-переменную `MACOS_P12_BASE64` (её
+   отсутствие использовалось как условие `if:` для шагов подписи).
+2. Импорт notarize-ключа (`MACOS_NOTARIZE_JSON`) и установку `rcodesign`.
+3. Заменить ad-hoc подпись на:
+   `codesign --force --options runtime -s "$MACOS_CODESIGN_IDENTITY" --deep --strict "TradingMD Remote.app"`
+   (обязательно `--options runtime` — hardened runtime требуется для нотаризации).
+4. Добавить `rcodesign notary-submit --api-key-path <key.json> --staple <dmg>`.
+5. Убрать из `INSTALL_MACOS_RU.md` разделы про предупреждение Gatekeeper и
+   `xattr -cr` — они станут не нужны.
+
 ## Быстрая проверка без полной сборки
 
 ```bash
