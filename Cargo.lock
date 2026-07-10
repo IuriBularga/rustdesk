@@ -7248,7 +7248,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rustdesk"
+name = "tradingmd-remote"
 version = "1.4.9"
 dependencies = [
  "android-wakelock",

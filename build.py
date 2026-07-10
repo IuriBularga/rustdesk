@@ -14,7 +14,7 @@ from pathlib import Path
 windows = platform.platform().startswith('Windows')
 osx = platform.platform().startswith(
     'Darwin') or platform.platform().startswith("macOS")
-hbb_name = 'rustdesk' + ('.exe' if windows else '')
+hbb_name = 'tradingmd-remote' + ('.exe' if windows else '')
 exe_path = 'target/release/' + hbb_name
 if windows:
     win_arch = 'arm64' if platform.machine().lower() in ('arm64', 'aarch64') else 'x64'
@@ -298,11 +298,11 @@ Section: net
 Priority: optional
 Version: %s
 Architecture: %s
-Maintainer: rustdesk <info@rustdesk.com>
-Homepage: https://rustdesk.com
+Maintainer: Trading.md <it.razvan@trading.md>
+Homepage: https://trading.md
 Depends: libgtk-3-0t64 | libgtk-3-0, libxcb-randr0, libxdo3 | libxdo4, libxfixes3, libxcb-shape0, libxcb-xfixes0, libasound2t64 | libasound2, libsystemd0, curl, libva2, libva-drm2, libva-x11-2, libgstreamer-plugins-base1.0-0, libpam0g, gstreamer1.0-pipewire%s
 Recommends: libayatana-appindicator3-1
-Description: A remote control software.
+Description: TradingMD Remote - Trading.md remote support tool (based on RustDesk).
 
 """ % (version, get_deb_arch(), get_deb_extra_depends())
     file = open(control_file_path, "w")
@@ -453,19 +453,19 @@ def build_flutter_windows(version, features, skip_portable_pack):
     os.chdir('libs/portable')
     system2('pip3 install -r requirements.txt')
     system2(
-        f'python3 ./generate.py -f ../../{flutter_build_dir_2} -o . -e ../../{flutter_build_dir_2}/rustdesk.exe')
+        f'python3 ./generate.py -f ../../{flutter_build_dir_2} -o . -e ../../{flutter_build_dir_2}/tradingmd-remote.exe')
     os.chdir('../..')
-    if os.path.exists('./rustdesk_portable.exe'):
+    if os.path.exists('./tradingmd_remote_portable.exe'):
         os.replace('./target/release/rustdesk-portable-packer.exe',
-                   './rustdesk_portable.exe')
+                   './tradingmd_remote_portable.exe')
     else:
         os.rename('./target/release/rustdesk-portable-packer.exe',
-                  './rustdesk_portable.exe')
+                  './tradingmd_remote_portable.exe')
     print(
-        f'output location: {os.path.abspath(os.curdir)}/rustdesk_portable.exe')
-    os.rename('./rustdesk_portable.exe', f'./rustdesk-{version}-install.exe')
+        f'output location: {os.path.abspath(os.curdir)}/tradingmd_remote_portable.exe')
+    os.rename('./tradingmd_remote_portable.exe', f'./tradingmd-remote-{version}-install.exe')
     print(
-        f'output location: {os.path.abspath(os.curdir)}/rustdesk-{version}-install.exe')
+        f'output location: {os.path.abspath(os.curdir)}/tradingmd-remote-{version}-install.exe')
 
 
 def main():
@@ -502,24 +502,24 @@ def main():
             build_flutter_windows(version, features, args.skip_portable_pack)
             return
         system2('cargo build --locked --release --features ' + features)
-        # system2('upx.exe target/release/rustdesk.exe')
-        system2('mv target/release/rustdesk.exe target/release/RustDesk.exe')
+        # system2('upx.exe target/release/tradingmd-remote.exe')
+        system2('mv target/release/tradingmd-remote.exe "target/release/TradingMD Remote.exe"')
         pa = os.environ.get('P')
         if pa:
             # https://certera.com/kb/tutorial-guide-for-safenet-authentication-client-for-code-signing/
             system2(
                 f'signtool sign /a /v /p {pa} /debug /f .\\cert.pfx /t http://timestamp.digicert.com  '
-                'target\\release\\rustdesk.exe')
+                '"target\\release\\TradingMD Remote.exe"')
         else:
             print('Not signed')
         os.makedirs(res_dir, exist_ok=True)
         system2(
-            f'cp -rf target/release/RustDesk.exe {res_dir}')
+            f'cp -rf "target/release/TradingMD Remote.exe" {res_dir}')
         os.chdir('libs/portable')
         system2('pip3 install -r requirements.txt')
         system2(
-            f'python3 ./generate.py -f ../../{res_dir} -o . -e ../../{res_dir}/rustdesk-{version}-win7-install.exe')
-        system2(f'mv ../../{res_dir}/rustdesk-{version}-win7-install.exe ../..')
+            f'python3 ./generate.py -f ../../{res_dir} -o . -e ../../{res_dir}/tradingmd-remote-{version}-win7-install.exe')
+        system2(f'mv ../../{res_dir}/tradingmd-remote-{version}-win7-install.exe ../..')
     elif os.path.isfile('/usr/bin/pacman'):
         # pacman -S -needed base-devel
         system2("sed -i 's/pkgver=.*/pkgver=%s/g' res/PKGBUILD" % version)

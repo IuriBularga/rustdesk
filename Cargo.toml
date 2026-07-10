@@ -1,11 +1,11 @@
 [package]
-name = "rustdesk"
+name = "tradingmd-remote"
 version = "1.4.9"
-authors = ["rustdesk <info@rustdesk.com>"]
+authors = ["rustdesk <info@rustdesk.com>", "Trading.md <it.razvan@trading.md>"]
 edition = "2021"
 build= "build.rs"
-description = "RustDesk Remote Desktop"
-default-run = "rustdesk"
+description = "TradingMD Remote Desktop"
+default-run = "tradingmd-remote"
 rust-version = "1.75"
 
 [lib]
@@ -211,9 +211,9 @@ libxdo-sys = { path = "libs/libxdo-sys-stub" }
 
 [package.metadata.winres]
 LegalCopyright = "Copyright © 2026 Purslane Tech Pte. Ltd. All rights reserved."
-ProductName = "RustDesk"
-FileDescription = "RustDesk Remote Desktop"
-OriginalFilename = "rustdesk.exe"
+ProductName = "TradingMD Remote"
+FileDescription = "TradingMD Remote Desktop"
+OriginalFilename = "tradingmd-remote.exe"
 
 [target.'cfg(target_os="windows")'.build-dependencies]
 winres = "0.1"
@@ -229,8 +229,8 @@ hound = "3.5"
 docopt = "1.1"
 
 [package.metadata.bundle]
-name = "RustDesk"
-identifier = "com.carriez.rustdesk"
+name = "TradingMD Remote"
+identifier = "md.trading.remote"
 icon = ["res/32x32.png", "res/128x128.png", "res/128x128@2x.png"]
 osx_minimum_system_version = "10.14"
 
