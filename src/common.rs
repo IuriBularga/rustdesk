@@ -1009,9 +1009,23 @@ pub fn is_rustdesk() -> bool {
     hbb_common::config::APP_NAME.read().unwrap().eq("RustDesk")
 }
 
+/// Identifier form of the app name: lowercase, alphanumeric only.
+///
+/// The display name may contain spaces ("TradingMD Remote"), which are not
+/// valid in a URI scheme or a file extension, so identifiers derived from the
+/// app name go through this helper.
+#[inline]
+pub fn get_app_id() -> String {
+    get_app_name()
+        .to_lowercase()
+        .chars()
+        .filter(|c| c.is_ascii_alphanumeric())
+        .collect()
+}
+
 #[inline]
 pub fn get_uri_prefix() -> String {
-    format!("{}://", get_app_name().to_lowercase())
+    format!("{}://", get_app_id())
 }
 
 #[cfg(target_os = "macos")]
