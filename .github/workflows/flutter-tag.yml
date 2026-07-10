@@ -9,6 +9,12 @@ on:
       - 'v[0-9]+.[0-9]+.[0-9]+-[0-9]+'
       - '[0-9]+.[0-9]+.[0-9]+-[0-9]+'
 
+# TradingMD: the release jobs publish artifacts to a GitHub Release, which needs
+# write access to repository contents. On a fork the default GITHUB_TOKEN is
+# read-only, so grant it explicitly (propagates to the reusable flutter-build).
+permissions:
+  contents: write
+
 jobs:
   run-flutter-tag-build:
     uses: ./.github/workflows/flutter-build.yml
