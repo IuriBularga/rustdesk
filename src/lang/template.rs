@@ -45,6 +45,7 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("Website", ""),
         ("About", ""),
         ("Slogan_tip", ""),
+        ("about_tradingmd_tip", ""),
         ("Privacy Statement", ""),
         ("Mute", ""),
         ("Build Date", ""),

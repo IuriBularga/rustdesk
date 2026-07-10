@@ -1096,14 +1096,27 @@ void showAbout(OverlayDialogManager dialogManager) {
       title: Text(translate('About RustDesk')),
       content: Wrap(direction: Axis.vertical, spacing: 12, children: [
         Text('Version: $version'),
+        Text(translate('about_tradingmd_tip')),
         InkWell(
             onTap: () async {
-              const url = 'https://rustdesk.com/';
+              const url = 'https://trading.md/';
               await launchUrl(Uri.parse(url));
             },
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 8),
-              child: Text('rustdesk.com',
+              child: Text('https://trading.md',
+                  style: TextStyle(
+                    decoration: TextDecoration.underline,
+                  )),
+            )),
+        InkWell(
+            onTap: () async {
+              const url = 'https://github.com/IuriBularga/rustdesk';
+              await launchUrl(Uri.parse(url));
+            },
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Text('Based on RustDesk, licensed under AGPL-3.0',
                   style: TextStyle(
                     decoration: TextDecoration.underline,
                   )),
