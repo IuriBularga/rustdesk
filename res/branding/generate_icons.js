@@ -94,6 +94,12 @@ async function main() {
   fs.writeFileSync(p('flutter/macos/Runner/AppIcon.icns'), icns);
   console.log(`flutter/macos/Runner/AppIcon.icns  ${icns.length} bytes`);
 
+  // --- in-app logo used by loadIcon() (prefers PNG, SVG fallback) ---
+  // NOTE: logo.svg must use inline fill="" attributes, not <style> CSS
+  // classes — flutter_svg (vector_graphics) ignores CSS classes and would
+  // render the whole logo as a black square.
+  await writePng(p('flutter/assets/icon.png'), await renderPng(iconSvg, 256));
+
   // --- SVG copies ---
   fs.writeFileSync(p('res/scalable.svg'), iconSvg);
   fs.writeFileSync(p('res/logo.svg'), iconSvg);
