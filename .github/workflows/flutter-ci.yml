@@ -17,6 +17,11 @@ on:
       - "appimage/**"
       - "flatpak/**"
 
+# TradingMD: flutter-build.yml has jobs that request `contents: write`; a called
+# workflow cannot exceed its caller, so without this the run fails at startup.
+permissions:
+  contents: write
+
 jobs:
   run-ci:
     uses: ./.github/workflows/flutter-build.yml
