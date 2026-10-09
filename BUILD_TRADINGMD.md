@@ -80,11 +80,11 @@ git add libs/hbb_common && git commit
 - Rust **1.75** (`rustup toolchain install 1.75`), target `x86_64-pc-windows-msvc`
 - Flutter **3.24.5**
 - Python 3, LLVM **15.0.6**, Visual Studio Build Tools (C++)
-- vcpkg, commit `120deac3062162151622ca4860575a33844ba10b`:
+- vcpkg, commit `9e593bb18ea69cc5095e012465dcd675a822ed0d`:
 
 ```powershell
 git clone https://github.com/microsoft/vcpkg C:\vcpkg
-git -C C:\vcpkg checkout 120deac3062162151622ca4860575a33844ba10b
+git -C C:\vcpkg checkout 9e593bb18ea69cc5095e012465dcd675a822ed0d
 C:\vcpkg\bootstrap-vcpkg.bat
 $env:VCPKG_ROOT = "C:\vcpkg"
 C:\vcpkg\vcpkg install --triplet x64-windows-static --x-install-root C:\vcpkg\installed

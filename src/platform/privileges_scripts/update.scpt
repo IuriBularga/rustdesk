@@ -17,7 +17,7 @@ on run {daemon_file, agent_file, user, cur_pid, source_dir}
   set load_service to "launchctl load -w " & quoted form of daemon_plist & ";"
   set agent_label_cmd to "agent_label=$(basename " & quoted form of agent_plist & " .plist);"
   set bootstrap_agent to "if [ -n \"$uid\" ]; then launchctl bootstrap gui/$uid " & quoted form of agent_plist & " 2>/dev/null || launchctl bootstrap user/$uid " & quoted form of agent_plist & " 2>/dev/null || launchctl load -w " & quoted form of agent_plist & " || true; else launchctl load -w " & quoted form of agent_plist & " || true; fi;"
-  set kickstart_agent to "if [ -n \"$uid\" ]; then launchctl kickstart -k gui/$uid/$agent_label 2>/dev/null || launchctl kickstart -k user/$uid/$agent_label 2>/dev/null || true; fi;"
+  set kickstart_agent to "if [ -n \"$uid\" ]; then launchctl kickstart -k gui/$uid/\"$agent_label\" 2>/dev/null || launchctl kickstart -k user/$uid/\"$agent_label\" 2>/dev/null || true; fi;"
   set load_agent to agent_label_cmd & bootstrap_agent & kickstart_agent
 
   set sh to "set -e;" & check_source & resolve_uid & unload_agent & unload_service & kill_others & copy_files & write_daemon_plist & write_agent_plist & load_service & load_agent
