@@ -2463,6 +2463,12 @@ pub fn get_dst_align_rgba() -> usize {
 }
 
 pub fn read_custom_client(config: &str) {
+    // TradingMD: custom.txt is verified against the upstream RustDesk key, so
+    // any config signed for another RustDesk custom client would be accepted
+    // here and could replace the pinned server and lift incoming-only.
+    if config::is_incoming_only() {
+        return;
+    }
     let Ok(data) = decode64(config) else {
         log::error!("Failed to decode custom client config");
         return;

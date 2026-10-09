@@ -2099,6 +2099,11 @@ pub fn prepare_custom_client_update() -> ResultType<bool> {
 }
 
 pub fn get_license_from_exe_name() -> ResultType<CustomServer> {
+    // TradingMD: the server and key are pinned at build time. Without this a
+    // renamed exe ("...-host=x,key=y.exe") takes precedence over the pin.
+    if config::is_incoming_only() {
+        bail!("Server configuration from the exe name is disabled");
+    }
     let mut exe = std::env::current_exe()?.to_str().unwrap_or("").to_owned();
     // if defined portable appname entry, replace original executable name with it.
     if let Ok(portable_exe) = std::env::var(PORTABLE_APPNAME_RUNTIME_ENV_KEY) {
