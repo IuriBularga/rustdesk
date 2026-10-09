@@ -4954,4 +4954,15 @@ ProcessId=10136
         );
         assert_eq!(pids.len(), 0);
     }
+
+    #[test]
+    fn test_exe_name_cannot_override_pinned_server() {
+        std::env::set_var(
+            PORTABLE_APPNAME_RUNTIME_ENV_KEY,
+            "remote-host=other.example.net,key=abc,.exe",
+        );
+        let lic = get_license_from_exe_name();
+        std::env::remove_var(PORTABLE_APPNAME_RUNTIME_ENV_KEY);
+        assert!(lic.is_err());
+    }
 }
